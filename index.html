@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>计算器</title>
+</head>
+<body>
+<style>
+    #calculator{
+        margin: 20% 40% 0 40%;
+        width: 24%;
+    }
+    .body{
+        width:100%;
+        font-size: 1.3em;
+    }
+    .header{
+        width: 98.6%;
+        height: 60px;
+        background: #cccccc;
+        margin-bottom: 0;
+    }
+    #button1,#button2,#button3,#button4,#button5{
+        cursor: pointer;
+       }
+    .ac,.add-subtract,.percent,.division,.sen,.eig,.nie,.multiple,.fou,.fiv,.six,.sub,.one,.two,.thr,.add,.poi,.equ{
+        border: 1px solid #ccc;
+        width: 24%;
+        height: 44px;
+        text-align: center;
+        float: left;
+    }
+    .add,.division,.multiple,.sub,.add,.equ{
+        background: #FFA500;
+        color: white;
+    }
+    .zer{
+        border: 1px solid #ccc;
+        width: 48.6%;
+        height: 44px;
+        text-align: center;
+        float: left;
+    }
+
+</style>
+<div id="calculator">
+    <div class="header">
+        欢迎使用本系统
+    </div>
+    <div class="body">
+        <div id="button1">
+            <div class="ac">AC</div>
+            <div class="add-subtract">+/-</div>
+            <div class="percent">%</div>
+            <div class="division">÷</div>
+        </div>
+        <div id="button2">
+            <div class="sen">7</div>
+            <div class="eig">8</div>
+            <div class="nie">9</div>
+            <div class="multiple">×</div>
+        </div>
+        <div id="button3">
+            <div class="fou">4</div>
+            <div class="fiv">5</div>
+            <div class="six">6</div>
+            <div class="sub">-</div>
+        </div>
+        <div id="button4">
+            <div class="one">1</div>
+            <div class="two">2</div>
+            <div class="thr">3</div>
+            <div class="add">+</div>
+        </div>
+        <div id="button5">
+            <div class="zer">0</div>
+            <div class="poi">.</div>
+            <div class="equ">=</div>
+        </div>
+    </div>
+</div>
+<script>
+    let numberArray = new Array(),calArray = new Array();//两个数组
+    let stringexpression='';
+    let point ='';
+    let oldnumberstr = '';
+    let header = document.getElementsByClassName('header')[0];
+    function getValue(str) {
+        /*显示屏*/
+        /*对输入的字符处理*/
+        switch (str){
+            case '0'://输入的数据进行入栈
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                if(oldnumberstr === ''){
+                    oldnumberstr=str;
+                    if(point !==''){
+                        let midpoint = numberArray.pop();
+                        midpoint+=oldnumberstr;
+                        oldnumberstr = midpoint;
+                    }
+                    numberArray.push(oldnumberstr);
+                }else {
+                    let mid = numberArray.pop();
+                    oldnumberstr = mid+str;
+                    numberArray.push(oldnumberstr);
+                }
+                break;
+            case 'AC':
+                /*清空两个数组*/
+                calArray.length=0;
+                numberArray.length = 0;
+                header.innerHTML = '0';
+                oldnumberstr = '';
+                stringexpression = '';
+                break;
+            case '+'://后面是运算符的操作
+            case '-':
+                oldnumberstr = '';
+                point = '';
+                if(calArray.length){//如果运算符数组不为空
+                    /*1.取出数据数组中的两个数据
+                    * 2.取出运算符数组中的第一个字符，计算
+                    * 3.将计算得到的结果重新压入运算数组,同时将以前的运算符弹出,将此时的运算符探入数组*/
+                    let oldstr = calArray.pop();
+                    let number2 = parseFloat(numberArray.pop());
+                    let number1 = parseFloat(numberArray.pop());
+                    let result;
+                    if(oldstr === '×' || oldstr === '÷'){/*如果前一个运算符是*或者/*/
+                        if(oldstr === '×'){
+                            result = number1*number2;
+                        }else {
+                            result = number1/number2;
+                        }
+                    }else if(oldstr === '+' || oldstr === '-'){/*如果前一个是+或者-*/
+                        if(oldstr === '-'){
+                            result = number1-number2;
+                        }else {
+                            result = number1+number2;
+                        }
+                    }
+                    calArray.push(str);/*将新的运算符压入数组*/
+                    numberArray.push(result);/**这里会不会有负号问题?**/
+                }else {
+                    calArray.push(str);//如果运算符数组为空,直接入栈
+                }
+                break;
+            case '×':
+            case '÷':
+                point = '';
+                oldnumberstr = '';
+                /*1.判断运算数组是否有运算符,没有直接压入栈,如果有判断运算符优先级
+                * 2.*/
+                if(calArray.length){
+                    let oldstr = calArray.pop();//弹出运算符
+                    if(oldstr ==='+' || oldstr === '-'){//如果为加减，则直接压入栈
+                        calArray.push(oldstr);
+                        calArray.push(str);
+                    }else {//如果为乘除,则弹出数据数组中的元素
+                        let number2 = parseFloat(numberArray.pop());
+                        let number1 = parseFloat(numberArray.pop());
+                        let result;
+                        if(oldstr === '×'){
+                            result = number1*number2;
+                        }else if(oldstr === '÷'){
+                            result = number1/number2;
+                        }
+                        /*将result压入数组*/
+                        numberArray.push(result);
+                        /*将新的符号压入运算数组*/
+                        calArray.push(str);
+                    }
+                }else {
+                    calArray.push(str);
+                }
+                break;
+            case '+/-':
+                if(numberArray.length === 0){
+                    header.innerHTML = '0';
+                    calArray.length = 0;
+                    numberArray.push(0);
+                }else {
+                    if(calArray.length > 1 || numberArray.length >1){
+                        header.innerHTML ='0';
+                        calArray.length = 0;
+                        numberArray.push(0);
+                    }else{
+                        let symbol = calArray.pop();
+                        let number = numberArray.pop();
+                        if(symbol+number!==stringexpression && calArray.length!==0){/*数字后面不能是字符*/
+                            calArray.length = 0;
+                            numberArray.push(0);
+                        }else {
+                            if(typeof symbol === 'undefined'){
+                                stringexpression = '-'+number;
+                                calArray.push('-');
+                            }
+                            else if(symbol ==='+'){
+                                stringexpression = '-'+number;
+                                calArray.push('-');
+                            }else if(symbol ==='-'){
+                                stringexpression =number;
+                            }else {
+                                calArray.length = 0;
+                                number = 0;
+                            }
+                            numberArray.push(number);
+                        }
+
+                    }
+                }
+                point ='';
+                oldnumberstr ='';
+                break;
+            case '.':
+                point = numberArray.pop();
+                point+=str;
+                numberArray.push(point);
+                oldnumberstr = '';
+                break;
+            case '%':
+                let value;
+                if(numberArray.length ===0){
+                    numberArray.push(0);
+                    value = 0;
+                }else {
+                    value = parseFloat(numberArray.pop())/100;
+                }
+                numberArray.length = 0;
+                calArray.length = 0;
+                stringexpression = value;
+                numberArray.push(value);
+                break;
+            case '=':
+                point = '';
+                oldnumberstr = '';
+                /*最后需要将将剩余的数组弹出*/
+                let callength = calArray.length;
+                let numberlength = numberArray.length;
+                let result;
+                if(callength +1 === numberlength){
+                    /*这里最后最多只会剩下两组运算符数据*/
+                    do{
+                        let lastcalstr = calArray.pop();
+                        let number2 = parseFloat(numberArray.pop());
+                        let number1 = parseFloat(numberArray.pop());
+                        switch (lastcalstr){
+                            case '×':
+                                result = number1 * number2;
+                                break;
+                            case '÷':
+                                result = number1/number2;
+                                break;
+                            case '+':
+                                result = number1+ number2;
+                                break;
+                            case '-':
+                                result = number1 - number2;
+                                break;
+                        }
+                        numberArray.push(result);
+                    }while (calArray.length>0)
+                }else {
+                    stringexpression = '运算结果错误';
+                }
+                stringexpression = numberArray.pop();
+                header.innerHTML = stringexpression;
+                numberArray.push(stringexpression);
+                break;
+        }
+        if(str!=='=' && str !=='AC' && str!=='+/-' && str!=='%'){
+            stringexpression+=str;
+        }
+        header.innerHTML = stringexpression;
+    }
+    let clickbody = document.getElementsByClassName('body')[0];
+    clickbody.addEventListener('click',(e)=>{
+       getValue(e.target.innerHTML);
+    });
+</script>
+</body>
+</html>
