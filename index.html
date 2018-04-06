@@ -81,9 +81,10 @@
 </div>
 <script>
     let numberArray = new Array(),calArray = new Array();//两个数组
-    let stringexpression='';
-    let point ='';
-    let oldnumberstr = '';
+    let stringexpression='';//显示屏需要显示的字符
+    let point ='';//是否有小数
+    let oldnumberstr = '';//用来记录两位数及以上的数字
+    let consecutivesymbols = false;//判断是否输入两个连续的操作符
     let header = document.getElementsByClassName('header')[0];
     function getValue(str) {
         /*显示屏*/
@@ -99,6 +100,7 @@
             case '7':
             case '8':
             case '9':
+                consecutivesymbols = false;
                 if(oldnumberstr === ''){
                     oldnumberstr=str;
                     if(point !==''){
@@ -114,6 +116,7 @@
                 }
                 break;
             case 'AC':
+                consecutivesymbols = false;
                 /*清空两个数组*/
                 calArray.length=0;
                 numberArray.length = 0;
@@ -123,6 +126,15 @@
                 break;
             case '+'://后面是运算符的操作
             case '-':
+                if(consecutivesymbols === true){
+                    stringexpression = '0';
+                    calArray.length = 0;
+                    numberArray.length=0;
+                    header.innerHTML = stringexpression;
+                    consecutivesymbols = false;
+                    return false;
+                }
+                consecutivesymbols = true;
                 oldnumberstr = '';
                 point = '';
                 if(calArray.length){//如果运算符数组不为空
@@ -154,6 +166,16 @@
                 break;
             case '×':
             case '÷':
+                if(consecutivesymbols === true){
+                    stringexpression = '0';
+                    calArray.length = 0;
+                    numberArray.length=0;
+
+                    header.innerHTML = stringexpression;
+                    consecutivesymbols = false;
+                    return false;
+                }
+                consecutivesymbols = true;
                 point = '';
                 oldnumberstr = '';
                 /*1.判断运算数组是否有运算符,没有直接压入栈,如果有判断运算符优先级
@@ -182,20 +204,25 @@
                 }
                 break;
             case '+/-':
+                consecutivesymbols = false;
                 if(numberArray.length === 0){
-                    header.innerHTML = '0';
+                    stringexpression = '0';
                     calArray.length = 0;
+                    numberArray.length=0;
                     numberArray.push(0);
                 }else {
                     if(calArray.length > 1 || numberArray.length >1){
-                        header.innerHTML ='0';
+                        stringexpression = '0';
                         calArray.length = 0;
+                        numberArray.length=0;
                         numberArray.push(0);
                     }else{
                         let symbol = calArray.pop();
                         let number = numberArray.pop();
                         if(symbol+number!==stringexpression && calArray.length!==0){/*数字后面不能是字符*/
+                            stringexpression = '0';
                             calArray.length = 0;
+                            numberArray.length=0;
                             numberArray.push(0);
                         }else {
                             if(typeof symbol === 'undefined'){
@@ -220,12 +247,14 @@
                 oldnumberstr ='';
                 break;
             case '.':
+                consecutivesymbols = false;
                 point = numberArray.pop();
                 point+=str;
                 numberArray.push(point);
                 oldnumberstr = '';
                 break;
             case '%':
+                consecutivesymbols = false;
                 let value;
                 if(numberArray.length ===0){
                     numberArray.push(0);
