@@ -7,7 +7,7 @@
 <body>
 <style>
     #calculator{
-        margin: 20% 40% 0 40%;
+        margin: 15% 40% 0 40%;
         width: 24%;
     }
     .body{
@@ -41,11 +41,10 @@
         text-align: center;
         float: left;
     }
-
 </style>
 <div id="calculator">
     <div class="header">
-        欢迎使用本系统
+        欢迎测试
     </div>
     <div class="body">
         <div id="button1">
@@ -86,10 +85,14 @@
     let oldnumberstr = '';//用来记录两位数及以上的数字
     let consecutivesymbols = false;//判断是否输入两个连续的操作符
     let header = document.getElementsByClassName('header')[0];
+    let fnumber = false;
+    let fistnumber = 0;
     function getValue(str) {
         /*显示屏*/
         /*对输入的字符处理*/
+        fistnumber++;
         switch (str){
+
             case '0'://输入的数据进行入栈
             case '1':
             case '2':
@@ -100,51 +103,111 @@
             case '7':
             case '8':
             case '9':
+
                 consecutivesymbols = false;
+
                 if(oldnumberstr === ''){
                     oldnumberstr=str;
-                    if(point !==''){
+                    if(fistnumber === 1 && numberArray.length !==0){
+                        let midfirstnumber = numberArray.pop();
+                        oldnumberstr = midfirstnumber + oldnumberstr;
+                        fistnumber=3;
+                    }
+
+
+                    else if(fnumber === true){
+                        let fmidnumber = numberArray.pop();
+                        oldnumberstr = fmidnumber+oldnumberstr;
+                        fnumber = false;
+                    }
+
+
+                    else if(point !==''){
                         let midpoint = numberArray.pop();
                         midpoint+=oldnumberstr;
                         oldnumberstr = midpoint;
                     }
+
+
                     numberArray.push(oldnumberstr);
                 }else {
                     let mid = numberArray.pop();
                     oldnumberstr = mid+str;
                     numberArray.push(oldnumberstr);
+                    fnumber = false;
                 }
+
+
                 break;
+
+
+
             case 'AC':
                 consecutivesymbols = false;
                 /*清空两个数组*/
                 calArray.length=0;
                 numberArray.length = 0;
-                header.innerHTML = '0';
                 oldnumberstr = '';
-                stringexpression = '';
+                stringexpression = '0';
                 break;
+
+
             case '+'://后面是运算符的操作
             case '-':
-                if(consecutivesymbols === true){
-                    stringexpression = '0';
-                    calArray.length = 0;
-                    numberArray.length=0;
+
+
+                if(fistnumber ===1 && consecutivesymbols!==true){
+                    numberArray.push(str);
+                    stringexpression+='-';
                     header.innerHTML = stringexpression;
-                    consecutivesymbols = false;
+                    fistnumber = 0;
+                    consecutivesymbols = true;
                     return false;
+                }else if(fistnumber ===1 && consecutivesymbols===true){
+                        stringexpression = '0';
+                        calArray.length = 0;
+                        numberArray.length=0;
+                        header.innerHTML =stringexpression ;
+                        consecutivesymbols = false;
+                        return false;
                 }
+
+
+                if(consecutivesymbols === true){
+                    if(str === '-' && fnumber === false){ 
+                        numberArray.push(str);
+                        stringexpression+='-';
+                        header.innerHTML = stringexpression;
+                        fnumber = true;
+                        return false;
+                    }else{
+                        stringexpression = '0';
+                        calArray.length = 0;
+                        numberArray.length=0;
+                        header.innerHTML = stringexpression;
+                        consecutivesymbols = false;
+                        return false;
+                    }
+                }
+
+
                 consecutivesymbols = true;
                 oldnumberstr = '';
                 point = '';
+
+
                 if(calArray.length){//如果运算符数组不为空
                     /*1.取出数据数组中的两个数据
                     * 2.取出运算符数组中的第一个字符，计算
                     * 3.将计算得到的结果重新压入运算数组,同时将以前的运算符弹出,将此时的运算符探入数组*/
+
+
                     let oldstr = calArray.pop();
                     let number2 = parseFloat(numberArray.pop());
                     let number1 = parseFloat(numberArray.pop());
                     let result;
+
+
                     if(oldstr === '×' || oldstr === '÷'){/*如果前一个运算符是*或者/*/
                         if(oldstr === '×'){
                             result = number1*number2;
@@ -158,30 +221,47 @@
                             result = number1+number2;
                         }
                     }
+
+
                     calArray.push(str);/*将新的运算符压入数组*/
                     numberArray.push(result);/**这里会不会有负号问题?**/
+
+
                 }else {
                     calArray.push(str);//如果运算符数组为空,直接入栈
                 }
+
+
                 break;
             case '×':
             case '÷':
+
+
                 if(consecutivesymbols === true){
                     stringexpression = '0';
                     calArray.length = 0;
                     numberArray.length=0;
-
                     header.innerHTML = stringexpression;
                     consecutivesymbols = false;
                     return false;
                 }
+
+
                 consecutivesymbols = true;
                 point = '';
                 oldnumberstr = '';
+
+
                 /*1.判断运算数组是否有运算符,没有直接压入栈,如果有判断运算符优先级
                 * 2.*/
+
+
                 if(calArray.length){
+
+
                     let oldstr = calArray.pop();//弹出运算符
+
+
                     if(oldstr ==='+' || oldstr === '-'){//如果为加减，则直接压入栈
                         calArray.push(oldstr);
                         calArray.push(str);
@@ -199,12 +279,20 @@
                         /*将新的符号压入运算数组*/
                         calArray.push(str);
                     }
+
+
                 }else {
                     calArray.push(str);
                 }
+
+
                 break;
             case '+/-':
+
+
                 consecutivesymbols = false;
+
+
                 if(numberArray.length === 0){
                     stringexpression = '0';
                     calArray.length = 0;
@@ -212,74 +300,119 @@
                     numberArray.push(0);
                 }else {
                     if(calArray.length > 1 || numberArray.length >1){
+
+
                         stringexpression = '0';
                         calArray.length = 0;
                         numberArray.length=0;
                         numberArray.push(0);
+
+
                     }else{
+
+
                         let symbol = calArray.pop();
                         let number = numberArray.pop();
+
+
                         if(symbol+number!==stringexpression && calArray.length!==0){/*数字后面不能是字符*/
                             stringexpression = '0';
                             calArray.length = 0;
                             numberArray.length=0;
                             numberArray.push(0);
+
+
                         }else {
+
+
                             if(typeof symbol === 'undefined'){
                                 stringexpression = '-'+number;
                                 calArray.push('-');
                             }
+
+
                             else if(symbol ==='+'){
                                 stringexpression = '-'+number;
                                 calArray.push('-');
+
+
                             }else if(symbol ==='-'){
                                 stringexpression =number;
+
+
                             }else {
                                 calArray.length = 0;
                                 number = 0;
+
+
                             }
+
+
                             numberArray.push(number);
                         }
-
                     }
                 }
+
+
                 point ='';
                 oldnumberstr ='';
+
+
                 break;
             case '.':
+
+
                 consecutivesymbols = false;
                 point = numberArray.pop();
                 point+=str;
                 numberArray.push(point);
                 oldnumberstr = '';
+
+
                 break;
             case '%':
+
+
                 consecutivesymbols = false;
                 let value;
+
+
                 if(numberArray.length ===0){
                     numberArray.push(0);
                     value = 0;
                 }else {
-                    value = parseFloat(numberArray.pop())/100;
+                    value = parseFloat(numberArray.pop())/100.0;
                 }
+
+
                 numberArray.length = 0;
                 calArray.length = 0;
                 stringexpression = value;
                 numberArray.push(value);
+
+
                 break;
             case '=':
+
+
                 point = '';
                 oldnumberstr = '';
                 /*最后需要将将剩余的数组弹出*/
                 let callength = calArray.length;
                 let numberlength = numberArray.length;
                 let result;
+
+
                 if(callength +1 === numberlength){
                     /*这里最后最多只会剩下两组运算符数据*/
                     do{
+
+
                         let lastcalstr = calArray.pop();
                         let number2 = parseFloat(numberArray.pop());
                         let number1 = parseFloat(numberArray.pop());
+
+
                         switch (lastcalstr){
                             case '×':
                                 result = number1 * number2;
@@ -294,25 +427,60 @@
                                 result = number1 - number2;
                                 break;
                         }
+
+
                         numberArray.push(result);
                     }while (calArray.length>0)
                 }else {
-                    stringexpression = '运算结果错误';
+
+
+                            stringexpression = '0';
+                            calArray.length = 0;
+                            numberArray.length=0;
+                            numberArray.push(0);
+                            return false;
+
+
                 }
+
+
                 stringexpression = numberArray.pop();
-                header.innerHTML = stringexpression;
-                numberArray.push(stringexpression);
-                break;
+                if(typeof stringexpression === 'undefined'){
+                    stringexpression = '0';
+                            calArray.length = 0;
+                            numberArray.length=0;
+                            numberArray.push(0);
+                            return false;
+
+                            
+                }else{
+
+                    header.innerHTML = stringexpression;
+                    numberArray.push(stringexpression);
+                    break;
+
+                     }
+                
         }
+
+
         if(str!=='=' && str !=='AC' && str!=='+/-' && str!=='%'){
+
             stringexpression+=str;
         }
+
+
         header.innerHTML = stringexpression;
     }
+
+
     let clickbody = document.getElementsByClassName('body')[0];
+
+
     clickbody.addEventListener('click',(e)=>{
        getValue(e.target.innerHTML);
     });
+
 </script>
 </body>
 </html>
